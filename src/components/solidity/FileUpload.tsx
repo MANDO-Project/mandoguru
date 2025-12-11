@@ -64,12 +64,21 @@ export default function FileUpload({ onFileUploaded, onStatusUpdate }: FileUploa
           estimatedCost: data.estimated_cost || data.estimatedCost || 1.0,
         };
         
-        console.log('New file uploaded:', newFile); // Debug log
+        console.log('File uploaded:', newFile); // Debug log
         
         // Notify parent component of successful upload
         onFileUploaded(newFile);
         
-        alert('File uploaded successfully! Click "Scan" to start the analysis.');
+        // Check if this is an existing file based on status or message
+        const isExistingFile = data.message?.toLowerCase().includes('already exists') || 
+                               data.message?.toLowerCase().includes('existing') ||
+                               (data.status && data.status.toLowerCase() !== 'pending' && data.status.toLowerCase() !== 'uploaded');
+        
+        if (isExistingFile) {
+          alert(`This file has already been uploaded`);
+        } else {
+          alert('File uploaded successfully! Click "Scan" to start the analysis.');
+        }
       } else {
         alert(`Upload failed: ${data.error}`);
       }

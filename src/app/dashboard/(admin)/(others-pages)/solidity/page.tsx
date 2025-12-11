@@ -83,7 +83,20 @@ export default function Ecommerce() {
   };
 
   const handleFileUploaded = (newFile: UploadedFile) => {
-    setUploadedFiles(prev => [newFile, ...prev]);
+    setUploadedFiles(prev => {
+      // Check if file with this ID already exists
+      const existingIndex = prev.findIndex(file => file.id === newFile.id);
+      
+      if (existingIndex !== -1) {
+        // File already exists - update it and move to top
+        const updated = [...prev];
+        updated.splice(existingIndex, 1); // Remove from current position
+        return [newFile, ...updated]; // Add to top with updated info
+      }
+      
+      // New file - add to top of list
+      return [newFile, ...prev];
+    });
   };
 
   const handleStatusUpdate = (id: string, status: string) => {
