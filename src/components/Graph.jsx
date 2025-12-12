@@ -23,7 +23,7 @@ export default function Graph({
         if (!node.code_lines || !Array.isArray(node.code_lines)) return false;
         return node.code_lines.includes(hoveredLineNumber);
       });
-      console.log('Matching nodes for line', matchingNodes);
+      // console.log('Matching nodes for line', matchingNodes);
       setHighlightedNodes(new Set(matchingNodes.map(node => node.id)));
     } else {
       setHighlightedNodes(new Set());
@@ -139,7 +139,7 @@ export default function Graph({
           nodeCanvasObject={paintRing}
           nodeCanvasObjectMode={node => 'before'}
           graphData={graphData}
-          nodeLabel={(node) => `Lines: ${Array.isArray(node.code_lines) ? node.code_lines.join(', ') : node.code_lines}\n${node.label}\nNode Type: ${node.node_type}`}
+          nodeLabel={(node) => `Lines: ${Array.isArray(node.code_lines) ? node.code_lines.join(', ') : node.code_lines}\nNode Type: ${node.node_type}`}
           linkLabel={(link) => link.edge_type}
           nodeColor={(node) => node.color || '#999999'}
           cooldownTicks={100}
