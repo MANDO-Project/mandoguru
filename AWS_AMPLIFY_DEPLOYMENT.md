@@ -104,7 +104,7 @@ Click "Advanced settings" and add these variables:
 | `NEXT_PUBLIC_COGNITO_CLIENT_ID` | Your Cognito app client ID | `1a2b3c4d5e6f7g8h9i0j` |
 | `NEXT_PUBLIC_COGNITO_USER_POOL_ID` | `ap-southeast-1_Uu8mUX2F6` | (or your pool ID) |
 | `NEXT_PUBLIC_COGNITO_REGION` | `ap-southeast-1` | |
-| `SCAN_API_BASE_URL` | Your backend API URL | `https://api.mandoguru.com` or `http://your-ip:5555` |
+| `NEXT_PUBLIC_SCAN_API_BASE_URL` | Your backend API URL | `https://api.mandoguru.com` or `http://your-ip:5555` |
 
 ### 2.4 Service Role
 
@@ -297,7 +297,7 @@ ipconfig /flushdns
 ### API Connection Fails
 
 **Check:**
-- [ ] `SCAN_API_BASE_URL` is correct in Amplify env vars
+- [ ] `NEXT_PUBLIC_SCAN_API_BASE_URL` is correct in Amplify env vars
 - [ ] Backend API is accessible from internet
 - [ ] Backend CORS allows your Amplify domain
 - [ ] Check browser console for CORS errors
@@ -305,7 +305,7 @@ ipconfig /flushdns
 ### 503 Service Unavailable
 
 This means your backend API is unreachable:
-- Verify `SCAN_API_BASE_URL` is correct
+- Verify `NEXT_PUBLIC_SCAN_API_BASE_URL` is correct
 - Ensure backend server is running
 - Check security groups/firewalls allow traffic
 
