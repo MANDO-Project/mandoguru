@@ -23,13 +23,6 @@ const cognitoAuthConfig = {
   }
 };
 
-console.log("Cognito Auth Config:", {
-    authority: process.env.NEXT_PUBLIC_COGNITO_AUTHORITY,
-    client_id: process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID,
-    redirect_uri: process.env.NEXT_PUBLIC_REDIRECT_URI,
-    post_logout_redirect_uri: process.env.NEXT_PUBLIC_LOGOUT_URI,
-  });
-
 export default function CognitoAuthProvider({
   children,
 }: {

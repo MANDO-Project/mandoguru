@@ -76,6 +76,7 @@ export default function RecentOrders({ uploadedFiles = [], onStatusUpdate }: Rec
       const token = auth.user?.access_token;
       if (!token) {
         alert('Authentication required. Please log in.');
+        setScanning(null);
         return;
       }
 
@@ -86,25 +87,41 @@ export default function RecentOrders({ uploadedFiles = [], onStatusUpdate }: Rec
         },
       });
 
-      const data = await response.json();
+      let data;
+      try {
+        data = await response.json();
+      } catch (parseError) {
+        console.error('Error parsing response:', parseError);
+        throw new Error('Invalid response from server');
+      }
 
+      // Update state first before showing alert to avoid race conditions
       if (response.ok && data.success) {
-        alert('Scan completed successfully!');
+        // Use the status from API response, fallback to 'scanned'
+        const newStatus = data.status || 'scanned';
         if (onStatusUpdate) {
-          onStatusUpdate(fileId, 'scanned');
+          onStatusUpdate(fileId, newStatus);
         }
+        // Use setTimeout to ensure state update is processed before alert
+        setTimeout(() => {
+          alert('Scan completed successfully!');
+        }, 0);
       } else {
-        alert(`Scan failed: ${data.error || 'Unknown error'}`);
         if (onStatusUpdate) {
           onStatusUpdate(fileId, 'failed');
         }
+        setTimeout(() => {
+          alert(`Scan failed: ${data.error || data.message || 'Unknown error'}`);
+        }, 0);
       }
     } catch (error) {
       console.error('Error scanning file:', error);
-      alert('Error scanning file');
       if (onStatusUpdate) {
         onStatusUpdate(fileId, 'failed');
       }
+      setTimeout(() => {
+        alert(`Error scanning file: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      }, 0);
     } finally {
       setScanning(null);
     }
