@@ -207,37 +207,42 @@ const CodeViewer = ({
   }, []);
 
   const getMessageForLine = (lineNumber) => {
-    // If reportMessages prop is provided, use it. Otherwise, use default message.
     const message = reportMessages[lineNumber] || `Issue detected on line ${lineNumber}`;
     const lines = message.split('\n').filter(line => line.trim());
     
     // Group lines into bug sections (Bug, Reason, Suggestion)
     const bugs = [];
+    const seenBugs = new Set();
     let currentBug = { bug: '', reason: '', suggestion: '' };
     
-    lines.forEach(line => {
+    for (const line of lines) {
       const trimmedLine = line.trim();
       if (trimmedLine.startsWith('Bug:')) {
-        // Save previous bug if exists
         if (currentBug.bug) {
-          bugs.push(currentBug);
+          const bugKey = `${currentBug.bug}|${currentBug.reason}|${currentBug.suggestion}`;
+          if (!seenBugs.has(bugKey)) {
+            seenBugs.add(bugKey);
+            bugs.push(currentBug);
+          }
         }
-        // Start new bug
         currentBug = { 
-          bug: trimmedLine.replace(/^Bug:\s*/, ''),
+          bug: trimmedLine.slice(4).trim(),
           reason: '',
           suggestion: ''
         };
       } else if (trimmedLine.startsWith('Reason:')) {
-        currentBug.reason = trimmedLine.replace(/^Reason:\s*/, '');
+        currentBug.reason = trimmedLine.slice(7).trim();
       } else if (trimmedLine.startsWith('Suggestion:')) {
-        currentBug.suggestion = trimmedLine.replace(/^Suggestion:\s*/, '');
+        currentBug.suggestion = trimmedLine.slice(11).trim();
       }
-    });
+    }
     
     // Add the last bug
     if (currentBug.bug) {
-      bugs.push(currentBug);
+      const bugKey = `${currentBug.bug}|${currentBug.reason}|${currentBug.suggestion}`;
+      if (!seenBugs.has(bugKey)) {
+        bugs.push(currentBug);
+      }
     }
     
     return bugs.length > 0 ? bugs : [{ bug: message, reason: '', suggestion: '' }];
