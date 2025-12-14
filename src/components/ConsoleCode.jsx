@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from "react";
+import { createPortal } from 'react-dom';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { solidity } from 'react-syntax-highlighter/dist/esm/languages/hljs';
 import {coy} from 'react-syntax-highlighter/dist/esm/styles/prism';
@@ -24,6 +25,15 @@ const CodeViewer = ({
   const containerRef = React.useRef(null);
   const codeRef = React.useRef(null);
   const hideTimeoutRef = React.useRef(null);
+  const showTimeoutRef = React.useRef(null);
+  const [isMounted, setIsMounted] = React.useState(false);
+  const [pendingLine, setPendingLine] = React.useState(null);
+
+  // Ensure portal only renders on client side
+  React.useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   React.useEffect(() => {
     if (scrollToLine && codeRef.current) {
       const lineElements = codeRef.current.querySelectorAll('[data-line-number]');
@@ -101,26 +111,59 @@ const CodeViewer = ({
       hideTimeoutRef.current = null;
     }
     
-    setHoveredLine(lineNumber);
+    // If popup is currently being hovered, don't change it
+    if (isPopupHovered) {
+      return;
+    }
     
-    // Get the absolute viewport position of the hovered line and code container
+    // If we're already showing this line's popup, do nothing
+    if (hoveredLine === lineNumber) {
+      return;
+    }
+    
+    // Store the line position immediately for smooth transition
     if (event && event.currentTarget && codeRef.current) {
       const lineRect = event.currentTarget.getBoundingClientRect();
       const codeContainerRect = codeRef.current.getBoundingClientRect();
       
-      // Use viewport coordinates for fixed positioning
-      // Center the popup horizontally within the code container
-      setLinePosition({
-        top: lineRect.top, // Absolute position in viewport
-        left: codeContainerRect.left + codeContainerRect.width / 2, // Center of code container
-        width: lineRect.width
+      setPendingLine({
+        lineNumber,
+        position: {
+          top: lineRect.top,
+          left: codeContainerRect.left + codeContainerRect.width / 2,
+          width: lineRect.width
+        }
       });
     }
     
-    onLineHover(lineNumber); // Notify parent component
+    // Clear any pending show timeout
+    if (showTimeoutRef.current) {
+      clearTimeout(showTimeoutRef.current);
+    }
+    
+    // Add delay before showing popup (allows user to move to existing popup)
+    showTimeoutRef.current = setTimeout(() => {
+      if (pendingLine || lineNumber) {
+        const targetLine = pendingLine?.lineNumber || lineNumber;
+        setHoveredLine(targetLine);
+        if (pendingLine?.position) {
+          setLinePosition(pendingLine.position);
+        }
+        onLineHover(targetLine);
+      }
+    }, 400); // 400ms delay before showing popup
   };
 
   const handleLineLeave = () => {
+    // Clear any pending show timeout
+    if (showTimeoutRef.current) {
+      clearTimeout(showTimeoutRef.current);
+      showTimeoutRef.current = null;
+    }
+    
+    // Clear pending line
+    setPendingLine(null);
+    
     // Only hide if popup is not being hovered
     if (!isPopupHovered) {
       hideTimeoutRef.current = setTimeout(() => {
@@ -136,6 +179,12 @@ const CodeViewer = ({
       clearTimeout(hideTimeoutRef.current);
       hideTimeoutRef.current = null;
     }
+    // Clear any pending show timeout (prevent new popup from appearing)
+    if (showTimeoutRef.current) {
+      clearTimeout(showTimeoutRef.current);
+      showTimeoutRef.current = null;
+    }
+    setPendingLine(null);
     setIsPopupHovered(true);
   };
 
@@ -150,6 +199,9 @@ const CodeViewer = ({
     return () => {
       if (hideTimeoutRef.current) {
         clearTimeout(hideTimeoutRef.current);
+      }
+      if (showTimeoutRef.current) {
+        clearTimeout(showTimeoutRef.current);
       }
     };
   }, []);
@@ -274,50 +326,53 @@ const CodeViewer = ({
           {code}
         </SyntaxHighlighter>
 
-        {/* Popup Message Box */}
-        {hoveredLine && (
-          <div 
-            className="fixed z-[9999] px-4 py-3 text-base bg-gray-800 text-white rounded-lg shadow-xl border-2 border-gray-600 cursor-auto"
-            style={{
-              left: `${linePosition.left}px`,
-              top: `${linePosition.top}px`,
-              transform: 'translate(-50%, calc(-100% - 15px))',
-              animation: 'fadeInScale 0.2s ease-out forwards',
-              minWidth: '650px',
-              maxWidth: '700px',
-              maxHeight: '500px',
-              overflowY: 'auto'
-            }}
-            onMouseEnter={handlePopupEnter}
-            onMouseLeave={handlePopupLeave}
-          >
-            <div className="space-y-4">
-              {getMessageForLine(hoveredLine).map((bug, index) => (
-                <div key={index} className="border-l-4 border-red-500 pl-3 pb-3 last:pb-0">
-                  <div className="mb-2">
-                    <span className="font-bold text-red-400">Bug: </span>
-                    <span className="text-white">{bug.bug}</span>
-                  </div>
-                  {bug.reason && (
-                    <div className="mb-2">
-                      <span className="font-bold text-yellow-400">Reason: </span>
-                      <span className="text-gray-300">{bug.reason}</span>
-                    </div>
-                  )}
-                  {bug.suggestion && (
-                    <div>
-                      <span className="font-bold text-green-400">Suggestion: </span>
-                      <span className="text-gray-300">{bug.suggestion}</span>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-            {/* Arrow pointing down */}
-            <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-[8px] border-r-[8px] border-t-[8px] border-transparent border-t-gray-800"></div>
-          </div>
-        )}
       </div>
+
+      {/* Popup Message Box - Rendered via Portal to ensure it's above all elements */}
+      {isMounted && hoveredLine && createPortal(
+        <div 
+          className="fixed px-4 py-3 text-base bg-gray-800 text-white rounded-lg shadow-xl border-2 border-gray-600 cursor-auto"
+          style={{
+            left: `${linePosition.left}px`,
+            top: `${linePosition.top}px`,
+            transform: 'translate(-50%, calc(-100% - 15px))',
+            animation: 'fadeInScale 0.2s ease-out forwards',
+            minWidth: '650px',
+            maxWidth: '700px',
+            maxHeight: '500px',
+            overflowY: 'auto',
+            zIndex: 2147483647 // Maximum z-index value
+          }}
+          onMouseEnter={handlePopupEnter}
+          onMouseLeave={handlePopupLeave}
+        >
+          <div className="space-y-4">
+            {getMessageForLine(hoveredLine).map((bug, index) => (
+              <div key={index} className="border-l-4 border-red-500 pl-3 pb-3 last:pb-0">
+                <div className="mb-2">
+                  <span className="font-bold text-red-400">Bug: </span>
+                  <span className="text-white">{bug.bug}</span>
+                </div>
+                {bug.reason && (
+                  <div className="mb-2">
+                    <span className="font-bold text-yellow-400">Reason: </span>
+                    <span className="text-gray-300">{bug.reason}</span>
+                  </div>
+                )}
+                {bug.suggestion && (
+                  <div>
+                    <span className="font-bold text-green-400">Suggestion: </span>
+                    <span className="text-gray-300">{bug.suggestion}</span>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+          {/* Arrow pointing down */}
+          <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-[8px] border-r-[8px] border-t-[8px] border-transparent border-t-gray-800"></div>
+        </div>,
+        document.body
+      )}
     </div>
   );
 };

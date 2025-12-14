@@ -3,6 +3,14 @@ import { useState, useRef, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 
 const ForceGraph = dynamic(() => import('react-force-graph').then(mod => mod.ForceGraph2D), { ssr: false });
+const ignoreNodeTypes = ['contract_declaration', 
+                        'constructor_definition', 
+                        'function_definition',
+                        'struct_declaration',
+                        'interface_declaration',    
+                        'struct_declaration',    
+                        'modifier_definition',];
+
 
 export default function Graph({
   graphData, 
@@ -65,7 +73,8 @@ export default function Graph({
       ctx.strokeStyle = '#FFA500'; // Light orange border
       ctx.lineWidth = 3;
     } else {
-      ctx.fillStyle = node.message === '' ? 'white' : 'red';
+      // check if node type is not in ignoreNodeTypes list
+      ctx.fillStyle = node.message === '' || ignoreNodeTypes.includes(node.node_type) ? 'white' : 'red';
       ctx.strokeStyle = '#000000';
       ctx.lineWidth = 1;
     }

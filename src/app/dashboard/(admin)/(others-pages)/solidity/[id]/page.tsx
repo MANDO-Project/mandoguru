@@ -100,10 +100,20 @@ export default function SolidityDetailPage() {
             graph.nodes.forEach(node => {
               if (node.message && node.message !== '' && Array.isArray(node.code_lines)) {
                 node.code_lines.forEach(lineNumber => {
-                  reportMessages[lineNumber] = node.message;
+                  // Chekc if lineNumber already has a message, 
+                  // and the message does not exist in messages list, append to it
+                  if (reportMessages[lineNumber] && !reportMessages[lineNumber].includes(node.message)) {
+                    reportMessages[lineNumber].push(node.message);
+                  } else {
+                  reportMessages[lineNumber] = [node.message];
+                  }
                 });
               }
             });
+            // Convert arrays of strings to single strings of each line
+            for (let line in reportMessages) {
+              reportMessages[line] = reportMessages[line].join('\n\n');
+            }
             setReportMessages(reportMessages);
           }
         }
