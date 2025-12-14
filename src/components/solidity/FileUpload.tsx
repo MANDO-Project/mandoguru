@@ -64,7 +64,6 @@ export default function FileUpload({ onFileUploaded, onStatusUpdate }: FileUploa
           estimatedCost: data.estimated_cost || data.estimatedCost || 1.0,
         };
         
-        console.log('File uploaded:', newFile); // Debug log
         
         // Notify parent component of successful upload
         onFileUploaded(newFile);
