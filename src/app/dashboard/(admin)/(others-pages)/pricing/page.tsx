@@ -228,6 +228,11 @@ function SelectOfferTab({
             type="button"
           >
             {button}
+            {button === "annually" && (
+              <span className="ml-2 rounded-full bg-gray-500 px-2 text-s font-medium text-white">
+                save 26%
+              </span>
+            )}
             {selectedBilledType === button && (
               <motion.div
                 animate={{ opacity: 1, scale: 1 }}
