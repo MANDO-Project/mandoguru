@@ -202,13 +202,13 @@ function SelectOfferTab({
           <div className="mx-auto mb-[60px] max-w-[510px] text-center">
              {/* Set the text color to blue */}
 
-            <span className="mb-2 block text-lg font-semibold text-primary">
+            <span className="mb-2 block text-lg font-semibold text-primary dark:text-white">
               Mando supports flexible pricing plans
             </span>
-            <h2 className="mb-3 text-3xl font-bold leading-[1.208] text-dark text-blue-450 dark:text-blue-400 sm:text-4xl md:text-[40px]">
-              Our Pricing Plan
+            <h2 className="mb-3 text-3xl font-bold leading-[1.208] text-dark text-blue-500 dark:text-blue-400 sm:text-4xl md:text-[40px]">
+              Our Pricing Plans
             </h2>
-            <p className="text-base text-body-color dark:text-dark-6">
+            <p className="text-base text-body-color dark:text-dark-6 dark:text-white">
               We believe Mando should be affordable to all devs, no matter the size.
             </p>
           </div>
