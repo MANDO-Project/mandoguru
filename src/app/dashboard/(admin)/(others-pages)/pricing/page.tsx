@@ -187,7 +187,7 @@ const OfferCard = ({
   );
 };
 
-export function SelectOfferTab({
+function SelectOfferTab({
   handleSwitchTab,
   selectedBilledType,
 }: Readonly<{
