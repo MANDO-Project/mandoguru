@@ -16,6 +16,7 @@ import {
   PlugInIcon,
   TableIcon,
   UserCircleIcon,
+  DollarLineIcon,
 } from "../icons/index";
 import SidebarWidget from "./SidebarWidget";
 
@@ -41,6 +42,12 @@ const navItems: NavItem[] = [
     icon: <UserCircleIcon />,
     name: "User Profile",
     path: "/dashboard/profile",
+  },
+
+    {
+    icon: <DollarLineIcon />,
+    name: "Pricing",
+    path: "/dashboard/pricing",
   },
 
   // {
