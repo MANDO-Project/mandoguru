@@ -135,7 +135,7 @@ const MandoPointsPage = () => {
               </div>
             </div>
             <ul className="space-y-4">
-              <QuestItem title="Follow & Join Discord" reward="200 MP" value="$2.00" />
+              <QuestItem title="Follow & Join Discord" reward="200 MP" value="$2.00"/>
               <QuestItem title="Share Announcements" reward="500 MP" value="$5.00" />
               <QuestItem title="Community Champion" reward="2,500 MP" value="$25/mo" />
             </ul>
@@ -279,7 +279,7 @@ const MandoPointsPage = () => {
 };
 
 // --- Helper Component for Quest Items ---
-const QuestItem = ({ title, reward, value, isHot, highlight }) => (
+const QuestItem = ({ title, reward, value, isHot = false, highlight = false }) => (
   <li className={`flex items-center justify-between p-3 rounded-lg ${highlight ? 'bg-gray-50 dark:bg-slate-800 border border-blue-100 dark:border-blue-900' : ''}`}>
     <div className="flex items-center gap-2">
       <span className="font-medium text-gray-700 dark:text-gray-200">{title}</span>
