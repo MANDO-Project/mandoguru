@@ -19,6 +19,7 @@ const CodeViewer = ({
 }) => {
 
   const [hoveredLine, setHoveredLine] = React.useState(null);
+  const [wordWrap, setWordWrap] = React.useState(true);
   const [mousePosition, setMousePosition] = React.useState({ x: 0, y: 0 });
   const [linePosition, setLinePosition] = React.useState({ top: 0, left: 0, width: 0 });
   const [isPopupHovered, setIsPopupHovered] = React.useState(false);
@@ -213,13 +214,13 @@ const CodeViewer = ({
     // Group lines into bug sections (Bug, Reason, Suggestion)
     const bugs = [];
     const seenBugs = new Set();
-    let currentBug = { bug: '', reason: '', suggestion: '' };
+    let currentBug = { bug: '', reason: '', suggestion: '', riskLevel: '' };
     
     for (const line of lines) {
       const trimmedLine = line.trim();
       if (trimmedLine.startsWith('Bug:')) {
         if (currentBug.bug) {
-          const bugKey = `${currentBug.bug}|${currentBug.reason}|${currentBug.suggestion}`;
+          const bugKey = `${currentBug.bug}|${currentBug.reason}|${currentBug.suggestion}|${currentBug.riskLevel}`;
           if (!seenBugs.has(bugKey)) {
             seenBugs.add(bugKey);
             bugs.push(currentBug);
@@ -228,24 +229,48 @@ const CodeViewer = ({
         currentBug = { 
           bug: trimmedLine.slice(4).trim(),
           reason: '',
-          suggestion: ''
+          suggestion: '',
+          riskLevel: ''
         };
       } else if (trimmedLine.startsWith('Reason:')) {
         currentBug.reason = trimmedLine.slice(7).trim();
       } else if (trimmedLine.startsWith('Suggestion:')) {
         currentBug.suggestion = trimmedLine.slice(11).trim();
+      } else if (trimmedLine.startsWith('Risk Level:')) {
+        currentBug.riskLevel = trimmedLine.slice(11).trim();
       }
     }
     
     // Add the last bug
     if (currentBug.bug) {
-      const bugKey = `${currentBug.bug}|${currentBug.reason}|${currentBug.suggestion}`;
+      const bugKey = `${currentBug.bug}|${currentBug.reason}|${currentBug.suggestion}|${currentBug.riskLevel}`;
       if (!seenBugs.has(bugKey)) {
+        seenBugs.add(bugKey);
         bugs.push(currentBug);
       }
     }
     
-    return bugs.length > 0 ? bugs : [{ bug: message, reason: '', suggestion: '' }];
+    // Helper to check if a bug has no useful reason/suggestion
+    const hasNoDetails = (bug) => {
+      const noReason = !bug.reason || bug.reason === 'No reason provided';
+      const noSuggestion = !bug.suggestion || bug.suggestion === 'No suggestion provided';
+      const noRiskLevel = !bug.riskLevel || bug.riskLevel === 'N/A';
+      return noReason && noSuggestion && noRiskLevel; 
+    };
+    
+    // Filter out bugs without reason/suggestion if another bug with the same type has details
+    const bugTypesWithDetails = new Set(
+      bugs.filter(b => !hasNoDetails(b)).map(b => b.bug)
+    );
+    
+    const filteredBugs = bugs.filter(bug => {
+      // Keep the bug if it has details
+      if (!hasNoDetails(bug)) return true;
+      // If no details, only keep if no other bug of the same type has details
+      return !bugTypesWithDetails.has(bug.bug);
+    });
+    
+    return filteredBugs.length > 0 ? filteredBugs : [{ bug: message, reason: '', suggestion: '', riskLevel: '' }];
   };
 
   return (
@@ -284,17 +309,68 @@ const CodeViewer = ({
           20% { background-color: rgba(255, 0, 0, 0.4); }
           100% { background-color: transparent; }
         }
+        
+        /* Word wrap styles */
+        .word-wrap-enabled pre {
+          white-space: pre-wrap !important;
+          word-wrap: break-word !important;
+          overflow-wrap: break-word !important;
+        }
+        .word-wrap-enabled code {
+          white-space: pre-wrap !important;
+          word-wrap: break-word !important;
+        }
+        .word-wrap-enabled span[style*="display: block"] {
+          white-space: pre-wrap !important;
+          word-wrap: break-word !important;
+        }
+        .word-wrap-disabled pre {
+          white-space: pre !important;
+        }
+        .word-wrap-disabled code {
+          white-space: pre !important;
+        }
       `}</style>
-      <h1 className="text-2xl font-bold text-center mb-4 text-black">Smart contract</h1>
       
-      <div ref={codeRef} className="relative flex-1 overflow-auto">
+      {/* Header with title and word-wrap toggle */}
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="text-2xl font-bold text-black">Smart contract</h1>
+        
+        {/* Word Wrap Toggle Switch */}
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-gray-600 font-medium">Word Wrap</span>
+          <button
+            onClick={() => setWordWrap(!wordWrap)}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+              wordWrap ? 'bg-blue-600' : 'bg-gray-400'
+            }`}
+            role="switch"
+            aria-checked={wordWrap}
+            aria-label="Toggle word wrap"
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-lg transition-transform duration-200 ease-in-out ${
+                wordWrap ? 'translate-x-6' : 'translate-x-1'
+              }`}
+            />
+          </button>
+        </div>
+      </div>
+      
+      <div ref={codeRef} className={`relative flex-1 overflow-auto ${wordWrap ? 'word-wrap-enabled' : 'word-wrap-disabled'}`}>
         <SyntaxHighlighter
           language="solidity"
           style={coy}
           showLineNumbers={true}
-          wrapLongLines={true}
+          wrapLines={true}
+          wrapLongLines={wordWrap}
           lineProps={(lineNumber) => {
-            const style = { display: 'block', width: 'fit-content' };
+            const style = { 
+              display: 'block', 
+              width: wordWrap ? '100%' : 'fit-content',
+              whiteSpace: wordWrap ? 'pre-wrap' : 'pre',
+              wordBreak: wordWrap ? 'break-word' : 'normal'
+            };
             const isHighlighted = fineGrainedReport.includes(lineNumber);
             const isHighlightedFromGraph = hoveredLinesFromGraph.includes(lineNumber);
             
@@ -358,16 +434,22 @@ const CodeViewer = ({
                   <span className="font-bold text-red-400">Bug: </span>
                   <span className="text-white">{bug.bug}</span>
                 </div>
-                {bug.reason && (
+                {bug.reason !== 'No reason provided' && (
                   <div className="mb-2">
                     <span className="font-bold text-yellow-400">Reason: </span>
                     <span className="text-gray-300">{bug.reason}</span>
                   </div>
                 )}
-                {bug.suggestion && (
+                {bug.suggestion !== 'No suggestion provided' && (
                   <div>
                     <span className="font-bold text-green-400">Suggestion: </span>
                     <span className="text-gray-300">{bug.suggestion}</span>
+                  </div>
+                )}
+                {bug.riskLevel && bug.riskLevel !== 'N/A' && (
+                  <div className="mt-2">
+                    <span className="font-bold text-purple-400">Risk Level: </span>
+                    <span className="text-gray-300">{bug.riskLevel}</span>
                   </div>
                 )}
               </div>

@@ -24,6 +24,7 @@ export default function SolidityDetailPage() {
   const [scrollToLine, setScrollToLine] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showUserGuide, setShowUserGuide] = useState(false);
 
   // Feedback popup states
   const [showFeedbackPopup, setShowFeedbackPopup] = useState(false);
@@ -252,6 +253,123 @@ export default function SolidityDetailPage() {
           >
             Back to Files
           </button>
+        </div>
+
+        {/* User Guide Section */}
+        <div className="mb-6">
+          <button
+            onClick={() => setShowUserGuide(!showUserGuide)}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
+          >
+            <svg 
+              className="w-5 h-5" 
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                strokeWidth={2} 
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" 
+              />
+            </svg>
+            <span className="font-medium">User Guide</span>
+            <svg 
+              className={`w-4 h-4 transition-transform duration-200 ${showUserGuide ? 'rotate-180' : ''}`} 
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          
+          {showUserGuide && (
+            <div className="mt-3 p-4 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/10 dark:to-indigo-900/10 border border-blue-200 dark:border-blue-800">
+              <h4 className="text-lg font-semibold text-gray-800 dark:text-white mb-3 flex items-center gap-2">
+                <span>📖</span> How to Use This Page
+              </h4>
+              
+              <div className="grid md:grid-cols-2 gap-4">
+                {/* Code Viewer Guide */}
+                <div className="bg-white dark:bg-gray-800/50 rounded-lg p-4 shadow-sm">
+                  <h5 className="font-semibold text-gray-700 dark:text-gray-200 mb-2 flex items-center gap-2">
+                    <span className="text-lg">💻</span> Code Viewer
+                  </h5>
+                  <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
+                    <li className="flex items-start gap-2">
+                      <span className="text-yellow-500 mt-0.5">●</span>
+                      <span><strong>Yellow highlighted lines</strong> indicate potential vulnerabilities detected in your code.</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-blue-500 mt-0.5">👆</span>
+                      <span><strong>Hover over highlighted lines</strong> to see detailed bug reports, reasons, and fix suggestions.</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-500 mt-0.5">↔️</span>
+                      <span><strong>Word Wrap toggle</strong> - Enable to wrap long lines without horizontal scrolling.</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-orange-500 mt-0.5">✨</span>
+                      <span><strong>Orange pulsing lines</strong> appear when hovering over graph nodes, showing related code.</span>
+                    </li>
+                  </ul>
+                </div>
+
+                {/* Graph Guide */}
+                <div className="bg-white dark:bg-gray-800/50 rounded-lg p-4 shadow-sm">
+                  <h5 className="font-semibold text-gray-700 dark:text-gray-200 mb-2 flex items-center gap-2">
+                    <span className="text-lg">🔗</span> Vulnerability Graph
+                  </h5>
+                  <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
+                    <li className="flex items-start gap-2">
+                      <span className="text-purple-500 mt-0.5">⬡</span>
+                      <span><strong>Nodes</strong> represent code elements (functions, variables, statements) in your smart contract.</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-blue-500 mt-0.5">→</span>
+                      <span><strong>Edges</strong> show relationships and control flow between code elements.</span>
+                    </li>
+                    <li>
+                      <span className="text-red-500 mt-0.5">⭕️  </span>
+                      <span><strong>Red circle</strong> indicates a potential vulnerable node. The bigger red circle indicates a potential high-risk vulnerability.</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-500 mt-0.5">👆</span>
+                      <span><strong>Hover over a node</strong> to see the node details.</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-yellow-500 mt-0.5">🖱️</span>
+                      <span><strong>Click on a node</strong> to automatically scroll to and highlight that line in the code.</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              {/* Vulnerability Indicators Guide */}
+              <div className="mt-4 bg-white dark:bg-gray-800/50 rounded-lg p-4 shadow-sm">
+                <h5 className="font-semibold text-gray-700 dark:text-gray-200 mb-2 flex items-center gap-2">
+                  <span className="text-lg">🛡️</span> Vulnerability Indicators
+                </h5>
+                <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
+                  The colored badges above show the scan results for different vulnerability categories:
+                </p>
+                <div className="flex flex-wrap gap-2 text-sm">
+                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300">
+                    <span className="w-2 h-2 rounded-full bg-red-500"></span> Red = Vulnerability Detected
+                  </span>
+                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">
+                    <span className="w-2 h-2 rounded-full bg-green-500"></span> Green = No Issues Found
+                  </span>
+                </div>
+              </div>
+
+              <p className="mt-4 text-xs text-gray-500 dark:text-gray-400 italic">
+                💡 Tip: The code viewer and graph are synchronized - interacting with one will update the other!
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Bug Type Indicators */}

@@ -60,10 +60,30 @@ export default function Graph({
   //   }
   // }, [hoveredLineNumber, graphData]);
 
+  // Helper function to check if node has high-risk bugs
+  const hasHighRiskBug = (node) => {
+    if (!node.message || node.message === '') return false;
+    const riskLevelMatches = node.message.match(/Risk Level:\s*(Info|Low|Medium|High|Critical)/gi);
+    if (!riskLevelMatches) return false;
+    return riskLevelMatches.some(match => {
+      const level = match.replace(/Risk Level:\s*/i, '').trim();
+      return level === 'High' || level === 'Critical';
+    });
+  };
+
   const paintRing = (node, ctx) => {
     // const isHighlighted = node.id === hoveredNodeId;
     const isHighlighted = highlightedNodes.has(node.id);
-    const scale = isHighlighted ? 2.2 : 1.8;
+    const isBuggy = node.message !== '' && !ignoreNodeTypes.includes(node.node_type);
+    const isHighRisk = isBuggy && hasHighRiskBug(node);
+    
+    // Determine scale: highlighted > high risk buggy > normal buggy > normal
+    let scale = 1.8;
+    if (isHighlighted) {
+      scale = 2.2;
+    } else if (isHighRisk) {
+      scale = 3.0; // Larger size for high-risk bugs
+    }
     
     ctx.beginPath();
     ctx.arc(node.x, node.y, 4 * scale, 0, 2 * Math.PI, false);
@@ -72,9 +92,13 @@ export default function Graph({
       ctx.fillStyle = '#FF4500'; // Bright orange for highlighted nodes
       ctx.strokeStyle = '#FFA500'; // Light orange border
       ctx.lineWidth = 3;
+    } else if (isHighRisk) {
+      ctx.fillStyle = '#DC143C'; // Crimson red for high-risk bugs
+      ctx.strokeStyle = '#8B0000'; // Dark red border
+      ctx.lineWidth = 3.0;
     } else {
       // check if node type is not in ignoreNodeTypes list
-      ctx.fillStyle = node.message === '' || ignoreNodeTypes.includes(node.node_type) ? 'white' : 'red';
+      ctx.fillStyle = isBuggy ? 'red' : 'white';
       ctx.strokeStyle = '#000000';
       ctx.lineWidth = 1;
     }
@@ -86,6 +110,14 @@ export default function Graph({
       ctx.shadowColor = '#FF4500';
       ctx.shadowBlur = 15;
       ctx.strokeStyle = '#FF4500';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.shadowBlur = 0; // Reset shadow for other nodes
+    } else if (isHighRisk) {
+      // Add glow effect for high-risk nodes
+      ctx.shadowColor = '#DC143C';
+      ctx.shadowBlur = 12;
+      ctx.strokeStyle = '#DC143C';
       ctx.lineWidth = 2;
       ctx.stroke();
       ctx.shadowBlur = 0; // Reset shadow for other nodes
