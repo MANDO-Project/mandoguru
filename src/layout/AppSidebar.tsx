@@ -79,14 +79,13 @@ const othersItems: NavItem[] = [
   {
     icon: <BoxCubeIcon />,
     name: "Point system",
-    subItems: [
-    ],
+    path: '/dashboard/point-system',
   },
-  // {
-  //   icon: <PlugInIcon />,
-  //   name: "Upgrade plan",
-  //   path: '/dashboard/upgrade_plan',
-  // },
+  {
+    icon: <PlugInIcon />,
+    name: "Feedback",
+    path: '/dashboard/feedback',
+  },
 ];
 
 const AppSidebar: React.FC = () => {

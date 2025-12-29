@@ -13,8 +13,8 @@ const pricingData: OfferCardProps[] = [
     title: "Starter",
     description: "For small teams",
     price: {
-      monthly: 11,
-      annually: 9,
+      monthly: 20,
+      annually: 16,
     },
     features: ["5 users included", "50 scans per month", "Email support"],
     // infos: ["30 users included", "15 GB of storage", "Phone and email support"],
@@ -23,8 +23,8 @@ const pricingData: OfferCardProps[] = [
     title: "Pro",
     description: "For medium-sized businesses",
     price: {
-      monthly: 36,
-      annually: 29,
+      monthly: 30,
+      annually: 22,
     },
     features: [
       "20 users included",
@@ -38,8 +38,8 @@ const pricingData: OfferCardProps[] = [
     title: "Enterprise",
     description: "For large businesses",
     price: {
-      monthly: 178,
-      annually: 149,
+      monthly: 300,
+      annually: 222,
     },
     features: [
       "100 users included",
