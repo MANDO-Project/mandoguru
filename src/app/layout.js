@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Mandoscan",
+  title: "MandoGuru",
   description: "AI-Powered Smart Contract Vulnerability Detection Tool",
 };
 

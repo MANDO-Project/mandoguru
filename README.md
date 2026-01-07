@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="public/mando_logo.svg" alt="Mandoscan Logo" width="200"/>
+  <img src="public/mando_logo.svg" alt="MandoGuru Logo" width="200"/>
 </p>
 
-<h1 align="center">Mandoscan</h1>
+<h1 align="center">MandoGuru</h1>
 
 <p align="center">
   <strong>Smart Contract Vulnerability Detection Platform</strong>
@@ -39,7 +39,7 @@
 
 ## 📖 Overview
 
-**Mandoscan** is a comprehensive smart contract security analysis platform built with Next.js 15, React 19, and Tailwind CSS. It enables developers to upload Solidity smart contracts, analyze them for vulnerabilities using AI-powered detection, and visualize the results through interactive control flow graphs and detailed reports.
+**MandoGuru** is a comprehensive smart contract security analysis platform built with Next.js 15, React 19, and Tailwind CSS. It enables developers to upload Solidity smart contracts, analyze them for vulnerabilities using AI-powered detection, and visualize the results through interactive control flow graphs and detailed reports.
 
 The platform detects **7 major vulnerability categories**:
 - 🔐 Access Control
